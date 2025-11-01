@@ -1,0 +1,32 @@
+global
+  log /dev/log local0
+  maxconn 2000
+
+defaults
+  log global
+  mode http
+  option httplog
+  option dontlognull
+  timeout connect 5s
+  timeout client  50s
+  timeout server  50s
+
+frontend http_front
+  bind *:80
+  default_backend web_back
+
+backend web_back
+  balance roundrobin
+  option httpchk GET /
+  server vm1 127.0.0.1:80 check
+  server vm2 {{ hostvars['vm2'].ansible_host }}:80 check
+
+frontend triton_front
+  bind *:8080
+  default_backend triton_back
+
+backend triton_back
+  balance roundrobin
+  option httpchk GET /
+  server triton {{ hostvars['vm2'].ansible_host }}:8000 check
+

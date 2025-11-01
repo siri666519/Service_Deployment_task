@@ -1,0 +1,72 @@
+- hosts: all
+  become: true
+  tasks:
+    - name: update apt and upgrade
+      apt:
+        update_cache: yes
+        upgrade: dist
+
+    - name: disable root SSH login
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: '^PermitRootLogin'
+        line: 'PermitRootLogin no'
+      notify: restart ssh
+
+    - name: install UFW
+      apt:
+        name: ufw
+        state: present
+
+    - name: allow SSH in UFW
+      ufw:
+        rule: allow
+        port: 22
+        proto: tcp
+
+  handlers:
+    - name: restart ssh
+      service:
+        name: ssh
+        state: restarted
+
+- hosts: all
+  become: true
+  tasks:
+    - name: install nginx
+      apt:
+        name: nginx
+        state: present
+
+    - name: configure index.html with host identifier
+      copy:
+        dest: /var/www/html/index.html
+        content: "Hello from {{ inventory_hostname }} ({{ ansible_host }})"
+      notify: restart nginx
+
+  handlers:
+    - name: restart nginx
+      service:
+        name: nginx
+        state: restarted
+
+- hosts: lb
+  become: true
+  tasks:
+    - name: install haproxy
+      apt:
+        name: haproxy
+        state: present
+
+    - name: push haproxy config
+      template:
+        src: templates/haproxy.cfg.j2
+        dest: /etc/haproxy/haproxy.cfg
+      notify: restart haproxy
+
+  handlers:
+    - name: restart haproxy
+      service:
+        name: haproxy
+        state: restarted
+
