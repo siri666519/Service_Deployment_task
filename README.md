@@ -1,9 +1,23 @@
 # Service_Deployment_task
 
+Architecture Diagram
+---------------------------
+
+Draw or insert a simple diagram (you can use draw.io or PowerPoint).
 
 
 
-# Service_Deployment_task
+[ Ansible Server ]
+        |
+        v
+[ HAProxy Load Balancer (VM1) ] ----> [ Backend 1 (VM1 Nginx) ]
+                                \
+                                 ----> [ Backend 2 (VM2 Nginx + Docker) ]
+
+
+
+
+
 Document: Service Deployment & Troubleshooting — Step-by-Step (Ready-to-copy)
 
 Title: Service Deployment and Troubleshooting using Ansible, HAProxy, Nginx & Docker
